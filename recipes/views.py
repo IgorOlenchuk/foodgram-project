@@ -24,7 +24,7 @@ def index(request):
     context = {
         'page': page,
         'paginator': paginator,
-        'tag': tag,
+        'tags': tags,
         'all_tags': Tag.objects.all(),
     }
     return render(request, 'recipes/index.html', context)

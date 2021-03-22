@@ -38,7 +38,7 @@ class Recipe(models.Model):
         Ingredient, through='RecipeIngredient'
     )
     cooking_time = models.PositiveSmallIntegerField('Время')
-    tags = models.ManyToManyField('Tags', related_name='recipes')
+    tags = models.ManyToManyField('Tag', related_name='recipes')
     pub_date = models.DateTimeField(
         'Дата публикации',
         auto_now_add=True,
@@ -69,7 +69,7 @@ class RecipeIngredient(models.Model):
     )
 
     class Meta:
-        unique_together = ('ingredient', 'recipes')
+        unique_together = ('ingredient', 'recipe')
 
 
 class Tag(models.Model):

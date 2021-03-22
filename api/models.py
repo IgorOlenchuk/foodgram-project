@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models import UniqueConstraint
 
 from recipes.models import Recipe
@@ -28,7 +27,7 @@ class Favorite(models.Model):
         User, on_delete=models.CASCADE, related_name='favorites',
         verbose_name='Пользователь',
     )
-    recipe = models.ForeignKey(
+    recipes = models.ForeignKey(
         Recipe, on_delete=models.CASCADE, related_name='favored_by',
         verbose_name='Избранный рецепт',
     )
@@ -43,7 +42,7 @@ class Purchase(models.Model):
         User, on_delete=models.CASCADE, related_name='purchases',
         verbose_name='Пользователь',
     )
-    recipe = models.ForeignKey(
+    recipes = models.ForeignKey(
         Recipe, on_delete=models.CASCADE, verbose_name='Рецепт в покупках',
     )
 
