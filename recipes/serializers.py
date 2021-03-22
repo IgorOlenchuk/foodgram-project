@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from .models import Post
+from .models import Recipe
 
 
-class PostSerializer(serializers.ModelSerializer):
+class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('text', 'author', 'pub_date')
-        model = Post
+        model = Recipe

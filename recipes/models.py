@@ -1,69 +1,81 @@
+from autoslug import AutoSlugField
 from django.db import models
 from django.contrib.auth import get_user_model
-from django.db.models import UniqueConstraint
+from django.core.validators import MinValueValidator
+
 
 User = get_user_model()
 
 
-class Group(models.Model):
+class Ingredient(models.Model):
+    title = models.CharField(
+        'Название ингредиента',
+        max_length=150,
+        db_index=True
+    )
+    dimension = models.CharField('Единица измерения', max_length=10)
 
-    title = models.CharField(max_length=200)
-    description = models.TextField()
-    slug = models.SlugField(unique=True)
+    class Meta:
+        ordering = ('title', )
+        verbose_name = 'ингредиент'
+        verbose_name_plural = 'ингредиенты'
+
+    def __str__(self):
+        return f'{self.title}, {self.dimension}'
+
+
+class Recipe(models.Model):
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='recipes',
+        verbose_name='Автор публикации'
+    )
+    title = models.CharField('Название', max_length=200)
+    image = models.ImageField('Изображение', upload_to='recipes/')
+    description = models.TextField('Описание')
+    ingredients = models.ManyToManyField(
+        Ingredient, through='RecipeIngredient'
+    )
+    cooking_time = models.PositiveSmallIntegerField('Время')
+    tags = models.ManyToManyField('Tags', related_name='recipes')
+    pub_date = models.DateTimeField(
+        'Дата публикации',
+        auto_now_add=True,
+        db_index=True
+    )
+    slug = AutoSlugField(populate_from='title', allow_unicode=True)
+
+    class Meta:
+        ordering = ('-pub_date', )
+        verbose_name = 'рецепт'
+        verbose_name_plural = 'рецепты'
 
     def __str__(self):
         return self.title
 
 
-class Post(models.Model):
+class RecipeIngredient(models.Model):
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='ingredients_amounts'
+    )
+    quantity = models.DecimalField(
+        max_digits=6,
+        decimal_places=1,
+        validators=[MinValueValidator(1)]
+    )
 
-    text = models.TextField()
-    pub_date = models.DateTimeField('date published', auto_now_add=True, db_index=True)
-    author = models.ForeignKey(User,
-                               on_delete=models.CASCADE,
-                               related_name='author_posts')
-    group = models.ForeignKey(Group,
-                              on_delete=models.SET_NULL,
-                              related_name='group_posts',
-                              blank=True, null=True)
-    image = models.ImageField(upload_to='posts/', blank=True, null=True)
+    class Meta:
+        unique_together = ('ingredient', 'recipes')
+
+
+class Tag(models.Model):
+    title = models.CharField('Название', max_length=50, db_index=True)
+    display_name = models.CharField('Название тега для шаблона', max_length=50)
+    color = models.CharField('Цвет', max_length=50)
 
     def __str__(self):
-        return self.text
-
-    class Meta:
-        ordering = ('-pub_date',)
-
-
-class Comment(models.Model):
-
-    text = models.TextField()
-    created = models.DateTimeField('date created', auto_now_add=True)
-    author = models.ForeignKey(User,
-                               on_delete=models.CASCADE,
-                               related_name='comments')
-    post = models.ForeignKey(Post,
-                             on_delete=models.CASCADE,
-                             related_name='comments')
-
-    def __str__(self):
-        return self.text
-
-    class Meta:
-        ordering = ('-created',)
-
-
-class Follow(models.Model):
-
-    user = models.ForeignKey(User,
-                             on_delete=models.CASCADE,
-                             related_name='follower')
-    author = models.ForeignKey(User,
-                               on_delete=models.CASCADE,
-                               related_name='following')
-
-    class Meta:
-
-        constraints = [
-            UniqueConstraint(fields=['author', 'user'], name='author')
-        ]
+        return self.title

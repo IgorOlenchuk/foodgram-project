@@ -161,3 +161,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ]
 }
+
+PAGINATION_PAGE_SIZE = 6
+FORBIDDEN_USERNAMES = 'admin'

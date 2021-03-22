@@ -1,76 +1,39 @@
 from rest_framework import serializers
+from rest_framework.fields import HiddenField, CurrentUserDefault
+from rest_framework.exceptions import ValidationError
 
-from .models import Category, Genre, Title, Review, Comments
-from users.models import User
+from .models import Favorite, Purchase, Subscription
+from recipes.models import Ingredient
 
 
-class CategorySerializer(serializers.ModelSerializer):
-    
+def validate_author(data):
+    if data.get('author') == data.get('user'):
+        raise ValidationError('Нельзя подписаться на самого себя')
+    return data
+
+
+class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ('name', 'slug',)
-        model = Category
+        fields = ('title', 'dimension')
+        model = Ingredient
 
 
-class GenreSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        fields = ('name', 'slug',)
-        model = Genre
-
-
-class TitleReadSerializer(serializers.ModelSerializer):
-    rating = serializers.IntegerField(read_only=True)
-    category = CategorySerializer(read_only=True)
-    genre = GenreSerializer(read_only=True, many=True)
+class SubscriptionSerializer(CurrentUserDefault, serializers.ModelSerializer):
+    user = HiddenField(default=CurrentUserDefault())
 
     class Meta:
-        fields = '__all__'
-        model = Title
-    
+        fields = ('author', 'user')
+        model = Subscription
+        validators = (validate_author, )
 
-class TitleWriteSerializer(serializers.ModelSerializer):
-    genre = serializers.SlugRelatedField(
-        slug_field='slug', many=True, queryset=Genre.objects.all()
-    )
-    category = serializers.SlugRelatedField(
-        slug_field='slug', queryset=Category.objects.all()
-    )
 
+class FavoriteSerializer(CurrentUserDefault, serializers.ModelSerializer):
     class Meta:
-        fields = '__all__'
-        model = Title
+        fields = ('recipes',)
+        model = Favorite
 
 
-class ReviewSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        slug_field='username', read_only=True
-    )
-
+class PurchaseSerializer(CurrentUserDefault, serializers.ModelSerializer):
     class Meta:
-        fields = ('id', 'text', 'author', 'score', 'pub_date')
-        model = Review
-
-    def validate(self, data):
-        if self.context['request'].method != 'POST':
-            return data
-
-        user = self.context['request'].user
-        title_id = (
-            self.context['request'].parser_context['kwargs']['title_id']
-        )
-        if Review.objects.filter(author=user, title__id=title_id).exists():
-            raise serializers.ValidationError(
-                'Вы уже оставили отзыв на данное произведение'
-            )
-        return data
-
-
-class CommentsSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        slug_field='username',
-        read_only=True,
-    )
-
-    class Meta:
-        fields = ('id', 'text', 'author', 'pub_date')
-        model = Comments
+        fields = ('recipes',)
+        model = Purchase

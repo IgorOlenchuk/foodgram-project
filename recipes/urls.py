@@ -1,25 +1,34 @@
-from django.urls import path
+from django.urls import include, path
 
 from . import views
 
+recipe_urls = [
+    path("new/", views.new_recipe, name="new_recipe"),
+    path(
+        '<int:recipe_id>/<slug:slug>/',
+        views.recipe_view_slug, name='recipe_view_slug'
+    ),
+    path(
+        '<int:recipe_id>/', views.recipe_view,
+        name='recipe_view_redirect'
+    ),
+    path('<int:recipe_id>/<slug:slug>/edit/', views.recipe_edit, name='edit_recipe'),
+    path(
+        '<int:recipe_id>/<slug:slug>/delete/',
+        views.recipe_delete, name='recipe_delete'
+    ),
+]
+
+purchases_urls = [
+    path('', views.purchases, name='purchases'),
+    path('download/', views.purchases_download, name='purchases_download'),
+]
+
 urlpatterns = [
     path("", views.index, name="index"),
-    path("new/", views.new_post, name="new_post"),
-    path("follow/", views.follow_index, name="follow_index"),
-    path("group/<slug:slug>", views.group_posts, name="group"),
-    # Профайл пользователя
-    path('<str:username>/', views.profile, name='profile'),
-    # Просмотр записи
-    path('<str:username>/<int:post_id>/', views.post_view, name='post'),
-    path(
-        '<str:username>/<int:post_id>/edit/',
-        views.post_edit,
-        name='post_edit'
-    ),
-    path("404/", views.page_not_found, name="page_not_found"),
-    path("500/", views.server_error, name="server_error"),
-    path("<str:username>/follow/", views.profile_follow, name="profile_follow"),
-    path("<str:username>/unfollow/", views.profile_unfollow, name="profile_unfollow"),
-    path("<username>/<int:post_id>/comment", views.add_comment, name="add_comment"),
-    path("api/v1/posts/<int:post_id>/", views.get_post, name="get_post"),
+    path('subscriptions/', views.subscriptions, name='subscriptions'),
+    path('favorites/', views.favorites, name='favorites'),
+    path('<str:username>/', views.profile, name='profile_view'),
+    path('purchases/', include(purchases_urls)),
+    path('recipes/', include(recipe_urls)),
 ]

@@ -1,91 +1,48 @@
-from django.shortcuts import get_object_or_404
-from django.db.models import Avg
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets, mixins
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from .models import Category, Genre, Title, Review, Comments
-from users.models import User
-from .filters import TitleFilter
-from .permissions import IsAdminOrReadOnly, IsAuthorAdminModeratorOrReadOnly
+from .models import Favorite, Subscription
+from .permissions import IsAuthorOrAdmin
 from .serializers import (
-    CategorySerializer, GenreSerializer, TitleReadSerializer,
-    TitleWriteSerializer, CommentsSerializer, ReviewSerializer
+    FavoriteSerializer, IngredientSerializer, PurchaseSerializer,
+    SubscriptionSerializer
 )
+from recipes.models import Ingredient
 
 
-class CategoryViewSet(mixins.CreateModelMixin,
-                      mixins.ListModelMixin,
-                      mixins.DestroyModelMixin,
-                      viewsets.GenericViewSet):
-    permission_classes = (IsAdminOrReadOnly,)
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
+class IngredientViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
+    search_fields = ('^title',)
 
 
-class GenreViewSet(mixins.CreateModelMixin,
-                   mixins.ListModelMixin,
-                   mixins.DestroyModelMixin,
-                   viewsets.GenericViewSet):
-    queryset = Genre.objects.all()
-    serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
-
-
-class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all().annotate(rating=Avg('review__score'))
-    permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = TitleFilter
-
-    def get_serializer_class(self):
-        if self.action in ('list', 'retrieve'):
-            return TitleReadSerializer
-        return TitleWriteSerializer
-
-
-class ReviewViewSet(viewsets.ModelViewSet):
-    serializer_class = ReviewSerializer
-    permission_classes = [
-        IsAuthenticatedOrReadOnly,
-        IsAuthorAdminModeratorOrReadOnly,
-    ]
+class CreateDestroyViewSet(mixins.CreateModelMixin,
+                           mixins.DestroyModelMixin,
+                           viewsets.GenericViewSet):
 
     def get_queryset(self):
-        title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
-        reviews = title.review.all()
-        return reviews
-
-    def perform_create(self, serializer):
-        title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
-        serializer.save(author=self.request.user, title=title)
+        return self.queryset.filter(user=self.request.user)
 
 
-class CommentsViewSet(viewsets.ModelViewSet):
-    serializer_class = CommentsSerializer
-    permission_classes = [
-        IsAuthenticatedOrReadOnly,
-        IsAuthorAdminModeratorOrReadOnly,
-    ]
+class SubscriptionViewSet(CreateDestroyViewSet):
+    queryset = Subscription.objects.all()
+    serializer_class = SubscriptionSerializer
+    permission_classes = (IsAuthenticated, IsAuthorOrAdmin)
+    lookup_field = 'author'
+
+
+class FavoriteViewSet(CreateDestroyViewSet):
+    queryset = Favorite.objects.all()
+    serializer_class = FavoriteSerializer
+    permission_classes = (AllowAny,)
+    lookup_field = 'recipes'
+
+
+class PurchaseViewSet(mixins.ListModelMixin, CreateDestroyViewSet):
+    serializer_class = PurchaseSerializer
+    permission_classes = (IsAuthenticated, IsAuthorOrAdmin)
+    lookup_field = 'recipes'
 
     def get_queryset(self):
-        review = get_object_or_404(
-            Review,
-            id=self.kwargs.get("review_id"),
-            title__id=self.kwargs.get("title_id")
-        )
-        return review.comments.all()
-
-    def perform_create(self, serializer, **kwargs):
-        review = get_object_or_404(
-            Review,
-            id=self.kwargs.get("review_id"),
-            title__id=self.kwargs.get("title_id")
-        )
-        serializer.save(author=self.request.user, review=review)
+        return self.request.user.purchases.all()
