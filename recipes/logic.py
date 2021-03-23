@@ -15,7 +15,7 @@ def get_paginated_view(request, some_list):
     return page, paginator
 
 
-def request_tags(request):
+def get_request_tags(request):
     return request.GET.getlist('tag', ('breakfast', 'lunch', 'dinner'))
 
 

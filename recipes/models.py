@@ -3,7 +3,6 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 
-
 User = get_user_model()
 
 
@@ -69,7 +68,12 @@ class RecipeIngredient(models.Model):
     )
 
     class Meta:
-        unique_together = ('ingredient', 'recipe')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['ingredient', 'recipe'],
+                name='unique_recipe_ingredient'
+            )
+        ]
 
 
 class Tag(models.Model):

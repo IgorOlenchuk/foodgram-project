@@ -6,17 +6,13 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 from .forms import RecipeForm
 from .models import Recipe, Tag
-from .logic import get_paginated_view, request_tags, save_recipe, edit_recipe
-
-
-from .serializers import RecipeSerializer
-
+from .logic import get_paginated_view, get_request_tags, save_recipe, edit_recipe
 
 User = get_user_model()
 
 
 def index(request):
-    tags = request_tags(request)
+    tags = get_request_tags(request)
     recipes = Recipe.objects.filter(tags__title__in=tags).select_related(
         'author').prefetch_related('tags').distinct()
 
@@ -27,7 +23,7 @@ def index(request):
         'tags': tags,
         'all_tags': Tag.objects.all(),
     }
-    return render(request, 'recipes/index.html', context)
+    return render(request, 'index.html', context)
 
 
 @login_required
@@ -42,16 +38,16 @@ def new_recipe(request):
         )
 
     context = {'form': form}
-    return render(request, 'recipes/formRecipe.html', context)
+    return render(request, 'formRecipe.html', context)
 
 
 def profile(request, username):
-    tags = request_tags(request)
+    tags = get_request_tags(request)
     author = get_object_or_404(User, username=username)
-    author_recipe = author.recipes.filter(
+    author_recipes = author.recipes.filter(
         tags__title__in=tags).prefetch_related('tags').distinct()
 
-    page, paginator = get_paginated_view(request, author_recipe)
+    page, paginator = get_paginated_view(request, author_recipes)
     context = {
         'author': author,
         'page': page,
@@ -59,7 +55,7 @@ def profile(request, username):
         'tags': tags,
         'all_tags': Tag.objects.all(),
     }
-    return render(request, 'recipes/authorRecipe.html', context)
+    return render(request, 'authorRecipe.html', context)
 
 
 def recipe_view(request, recipe_id):
@@ -69,35 +65,35 @@ def recipe_view(request, recipe_id):
 
 @login_required
 def recipe_edit(request, recipe_id, slug):
-    recipes = get_object_or_404(Recipe, id=recipe_id)
+    recipe = get_object_or_404(Recipe, id=recipe_id)
 
     if not request.user.is_superuser:
-        if request.user != recipes.author:
+        if request.user != recipe.author:
             return redirect(
-                'recipe_view_slug', recipe_id=recipes.id, slug=recipes.slug
+                'recipe_view_slug', recipe_id=recipe.id, slug=recipe.slug
             )
 
     form = RecipeForm(
         request.POST or None,
         files=request.FILES or None,
-        instance=recipes
+        instance=recipe
     )
 
     if form.is_valid():
-        edit_recipe(request, form, instance=recipes)
+        edit_recipe(request, form, instance=recipe)
         return redirect(
-            'recipe_view_slug', recipe_id=recipes.id, slug=recipes.slug
+            'recipe_view_slug', recipe_id=recipe.id, slug=recipe.slug
         )
 
-    context = {'form': form, 'recipes': recipes}
-    return render(request, 'recipes/formRecipe.html', context)
+    context = {'form': form, 'recipes': recipe}
+    return render(request, 'formRecipe.html', context)
 
 
 @login_required
 def recipe_delete(request, recipe_id, slug):
-    recipes = get_object_or_404(Recipe, id=recipe_id)
-    if request.user.is_superuser or request.user == recipes.author:
-        recipes.delete()
+    recipe = get_object_or_404(Recipe, id=recipe_id)
+    if request.user.is_superuser or request.user == recipe.author:
+        recipe.delete()
     return redirect('index')
 
 
@@ -107,8 +103,8 @@ def recipe_view_slug(request, recipe_id, slug):
         id=recipe_id,
         slug=slug
     )
-    context = {'recipes': recipe}
-    return render(request, 'recipes/singlePage.html', context)
+    context = {'recipe': recipe}
+    return render(request, 'singlePage.html', context)
 
 
 @login_required
@@ -119,12 +115,12 @@ def subscriptions(request):
 
     page, paginator = get_paginated_view(request, authors)
     context = {'page': page, 'paginator': paginator}
-    return render(request, 'recipes/subscriptions.html', context)
+    return render(request, 'subscriptions.html', context)
 
 
 @login_required
 def favorites(request):
-    tags = request_tags(request)
+    tags = get_request_tags(request)
     recipe = Recipe.objects.filter(
         favored_by__user=request.user, tags__title__in=tags
     ).select_related('author').prefetch_related('tags').distinct()
@@ -136,13 +132,13 @@ def favorites(request):
         'tags': tags,
         'all_tags': Tag.objects.all(),
     }
-    return render(request, 'recipes/favorite.html', context)
+    return render(request, 'favorite.html', context)
 
 
 @login_required
 def purchases(request):
-    recipe = request.user.purchases.all()
-    return render(request, 'recipes/shopList.html', {'recipes': recipe})
+    recipes = request.user.purchases.all()
+    return render(request, 'shopList.html', {'recipes': recipes})
 
 
 @login_required

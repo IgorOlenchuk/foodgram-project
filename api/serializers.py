@@ -29,11 +29,11 @@ class SubscriptionSerializer(CurrentUserDefault, serializers.ModelSerializer):
 
 class FavoriteSerializer(CurrentUserDefault, serializers.ModelSerializer):
     class Meta:
-        fields = ('recipes',)
+        fields = ('recipe',)
         model = Favorite
 
 
 class PurchaseSerializer(CurrentUserDefault, serializers.ModelSerializer):
     class Meta:
-        fields = ('recipes',)
+        fields = ('recipe',)
         model = Purchase

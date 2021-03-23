@@ -6,6 +6,6 @@ from . import views
 
 urlpatterns = [
     path('signup/', views.SignUpView.as_view(), name='signup'),
-    path('logout/', LogoutView.as_view(),
+    path('logged_out/', LogoutView.as_view(),
          {'next_page': settings.LOGOUT_REDIRECT_URL}, name='logout'),
 ]

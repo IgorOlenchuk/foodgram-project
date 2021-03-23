@@ -20,10 +20,7 @@ class IngredientViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 class CreateDestroyViewSet(mixins.CreateModelMixin,
                            mixins.DestroyModelMixin,
                            viewsets.GenericViewSet):
-
-    def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
-
+    pass
 
 class SubscriptionViewSet(CreateDestroyViewSet):
     queryset = Subscription.objects.all()
@@ -36,13 +33,13 @@ class FavoriteViewSet(CreateDestroyViewSet):
     queryset = Favorite.objects.all()
     serializer_class = FavoriteSerializer
     permission_classes = (AllowAny,)
-    lookup_field = 'recipes'
+    lookup_field = 'recipe'
 
 
 class PurchaseViewSet(mixins.ListModelMixin, CreateDestroyViewSet):
     serializer_class = PurchaseSerializer
     permission_classes = (IsAuthenticated, IsAuthorOrAdmin)
-    lookup_field = 'recipes'
+    lookup_field = 'recipe'
 
     def get_queryset(self):
         return self.request.user.purchases.all()
