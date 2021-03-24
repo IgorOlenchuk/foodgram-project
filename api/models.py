@@ -39,7 +39,7 @@ class Favorite(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'recipe'], name='unique_favorite'
+                fields=['user', 'recipes'], name='unique_favorite'
             )
         ]
 
@@ -57,6 +57,6 @@ class Purchase(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'recipe'], name='unique_purchase'
+                fields=['user', 'recipes'], name='unique_purchase'
             )
         ]
