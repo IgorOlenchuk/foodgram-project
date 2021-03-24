@@ -22,6 +22,7 @@ class CreateDestroyViewSet(mixins.CreateModelMixin,
                            viewsets.GenericViewSet):
     pass
 
+
 class SubscriptionViewSet(CreateDestroyViewSet):
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer

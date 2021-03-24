@@ -9,7 +9,11 @@ from .views import (FavoriteViewSet,
 router_v1 = DefaultRouter()
 
 router_v1.register(r'ingredients', IngredientViewSet, basename='ingredients')
-router_v1.register(r'subscriptions', SubscriptionViewSet, basename='subscriptions')
+router_v1.register(
+    r'subscriptions',
+    SubscriptionViewSet,
+    basename='subscriptions'
+)
 router_v1.register(r'favorites', FavoriteViewSet, basename='favorites')
 router_v1.register(r'purchases', PurchaseViewSet, basename='purchases')
 

@@ -20,5 +20,10 @@ urlpatterns += [
 urlpatterns += [
     path('about/', include('django.contrib.flatpages.urls')),
     path('author/', views.flatpage, {'url': '/author/'}, name='author'),
-    path('technologis/', views.flatpage, {'url': '/technologis/'}, name='technologis'),
+    path(
+        'technologis/',
+        views.flatpage,
+        {'url': '/technologis/'},
+        name='technologis'
+    ),
 ]

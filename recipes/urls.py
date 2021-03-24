@@ -12,7 +12,10 @@ recipe_urls = [
         '<int:recipe_id>/', views.recipe_view,
         name='recipe_view'
     ),
-    path('<int:recipe_id>/<slug:slug>/edit/', views.recipe_edit, name='edit_recipe'),
+    path(
+        '<int:recipe_id>/<slug:slug>/edit/',
+        views.recipe_edit, name='edit_recipe'
+    ),
     path(
         '<int:recipe_id>/<slug:slug>/delete/',
         views.recipe_delete, name='recipe_delete'

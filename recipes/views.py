@@ -6,7 +6,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 from .forms import RecipeForm
 from .models import Recipe, Tag
-from .logic import get_paginated_view, get_request_tags, save_recipe, edit_recipe
+from .logic import (get_paginated_view,
+                    get_request_tags,
+                    save_recipe,
+                    edit_recipe)
 
 User = get_user_model()
 
