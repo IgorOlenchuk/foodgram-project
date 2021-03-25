@@ -2,7 +2,7 @@ import os
 from datetime import timedelta
 import _locale
 
-#os.environ['DJANGO_SETTINGS_MODULE'] = 'foodgram.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'foodgram.settings'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -15,16 +15,16 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ.get('SECRET_KEY', default='6&#qo%+#8+$u=v5h+f$_=3b!@(=l6)q(p8$(u-_6xw^mlq#e)=')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = os.environ.get('DEBUG', default=False)
-DEBUG = True
-#ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', default='localhost').split(',')
-ALLOWED_HOSTS = [
-        "*",
-        "localhost",
-        "127.0.0.1",
-        "[::1]",
-        "testserver",
-]
+DEBUG = os.environ.get('DEBUG', default=False)
+#DEBUG = True
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', default='localhost').split(',')
+#ALLOWED_HOSTS = [
+#        "*",
+#        "localhost",
+#        "127.0.0.1",
+#        "[::1]",
+#        "testserver",
+#]
 
 # Application definition
 
@@ -56,9 +56,9 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
-INTERNAL_IPS = [
-    '127.0.0.1',
-]
+#INTERNAL_IPS = [
+#    '127.0.0.1',
+#]
 
 ROOT_URLCONF = 'foodgram.urls'
 
@@ -86,22 +86,22 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': os.environ.get('DB_ENGINE', default='django.db.backends.postgresql'),
-#        'NAME': os.environ.get('DB_NAME', default='postgres'),
-#        'USER': os.environ.get('POSTGRES_USER', default='postgres'),
-#        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', default='postgres'),
-#        'HOST': os.environ.get('DB_HOST', default='db'),
-#        'PORT': os.environ.get('DB_PORT', default='5432')
-#    }
-#}
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': os.environ.get('DB_ENGINE', default='django.db.backends.postgresql'),
+        'NAME': os.environ.get('DB_NAME', default='postgres'),
+        'USER': os.environ.get('POSTGRES_USER', default='postgres'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', default='postgres'),
+        'HOST': os.environ.get('DB_HOST', default='db'),
+        'PORT': os.environ.get('DB_PORT', default='5432')
     }
 }
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#    }
+#}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
