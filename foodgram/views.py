@@ -1,10 +1,6 @@
 from django.shortcuts import render
 
 
-def page_bad_request(request, exception):
-    return render(request, 'misc/400.html', status=400)
-
-
 def page_not_found(request, exception):
     return render(request, 'misc/404.html', status=404)
 
