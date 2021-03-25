@@ -46,7 +46,7 @@ def new_recipe(request):
 
 def profile(request, username):
     tags = get_request_tags(request)
-    author = get_object_or_404(User, username=username)
+    author = get_object_or_404(get_user_model(), username=username)
     author_recipes = author.recipes.filter(
         tags__title__in=tags).prefetch_related('tags').distinct()
 
@@ -88,7 +88,7 @@ def recipe_edit(request, recipe_id, slug):
             'recipe_view_slug', recipe_id=recipe.id, slug=recipe.slug
         )
 
-    context = {'form': form, 'recipes': recipe}
+    context = {'form': form, 'recipe': recipe}
     return render(request, 'formRecipe.html', context)
 
 
@@ -124,11 +124,11 @@ def subscriptions(request):
 @login_required
 def favorites(request):
     tags = get_request_tags(request)
-    recipe = Recipe.objects.filter(
+    recipes = Recipe.objects.filter(
         favored_by__user=request.user, tags__title__in=tags
     ).select_related('author').prefetch_related('tags').distinct()
 
-    page, paginator = get_paginated_view(request, recipe)
+    page, paginator = get_paginated_view(request, recipes)
     context = {
         'page': page,
         'paginator': paginator,
@@ -150,7 +150,7 @@ def purchases_download(request):
     dimension = 'recipe__ingredients__dimension'
     quantity = 'recipe__ingredients_amounts__quantity'
 
-    ingredients = request.user.purchases.select_related('recipes').order_by(
+    ingredients = request.user.purchases.select_related('recipe').order_by(
         title).values(title, dimension).annotate(amount=Sum(quantity)).all()
 
     if not ingredients:

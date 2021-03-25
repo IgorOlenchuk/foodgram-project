@@ -1,4 +1,4 @@
-from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer
 from rest_framework.fields import HiddenField, CurrentUserDefault
 from rest_framework.exceptions import ValidationError
 
@@ -12,13 +12,13 @@ def validate_author(data):
     return data
 
 
-class IngredientSerializer(serializers.ModelSerializer):
+class IngredientSerializer(ModelSerializer):
     class Meta:
         fields = ('title', 'dimension')
         model = Ingredient
 
 
-class SubscriptionSerializer(CurrentUserDefault, serializers.ModelSerializer):
+class SubscriptionSerializer(CurrentUserDefault, ModelSerializer):
     user = HiddenField(default=CurrentUserDefault())
 
     class Meta:
@@ -27,13 +27,13 @@ class SubscriptionSerializer(CurrentUserDefault, serializers.ModelSerializer):
         validators = (validate_author, )
 
 
-class FavoriteSerializer(CurrentUserDefault, serializers.ModelSerializer):
+class FavoriteSerializer(CurrentUserDefault, ModelSerializer):
     class Meta:
-        fields = ('recipes',)
+        fields = ('recipe',)
         model = Favorite
 
 
-class PurchaseSerializer(CurrentUserDefault, serializers.ModelSerializer):
+class PurchaseSerializer(CurrentUserDefault, ModelSerializer):
     class Meta:
-        fields = ('recipes',)
+        fields = ('recipe',)
         model = Purchase
