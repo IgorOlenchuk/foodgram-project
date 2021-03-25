@@ -65,6 +65,19 @@ jobs:
          sudo docker stop $(sudo docker ps -a -q) > /dev/null 2>&1
          sudo docker kill $(sudo docker ps -a -q) > /dev/null 2>&1
          sudo docker-compose up -d  --force-recreate
+
+   - name: Prepare django
+     uses: appleboy/ssh-action@master
+     with:
+       host: ${{ secrets.CLOUD_HOST }}
+       username: ${{ secrets.CLOUD_USER }}
+       key: ${{ secrets.SSH_KEY }}
+       passphrase: ${{ secrets.PASSPHRASE }}
+       script: |
+         sudo docker-compose exec -T web python3 manage.py collectstatic --noinput
+         sudo docker-compose exec -T web python3 manage.py migrate --noinput
+         sudo docker-compose exec -T web python3 manage.py loaddata dump.json
+
    - name: Clean up
      uses: appleboy/ssh-action@master
      with:
@@ -75,15 +88,6 @@ jobs:
        script: |
          sudo docker system prune -f > /dev/null 2>&1
          sudo docker volume prune -f > /dev/null 2>&1
-   - name: Prepare django
-     uses: appleboy/ssh-action@master
-     with:
-       host: ${{ secrets.CLOUD_HOST }}
-       username: ${{ secrets.CLOUD_USER }}
-       key: ${{ secrets.SSH_KEY }}
-       passphrase: ${{ secrets.PASSPHRASE }}
-       script: |
-         sudo docker-compose exec -T web python3 manage.py collectstatic --noinput
 
   send_message:
     runs-on: ubuntu-latest
