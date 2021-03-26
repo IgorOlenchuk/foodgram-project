@@ -1,7 +1,7 @@
 import os
 from datetime import timedelta
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'api_yamdb.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'foodgram.settings'
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -83,7 +83,6 @@ DATABASES = {
         'PORT': os.environ.get('DB_PORT', default='5432')
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
