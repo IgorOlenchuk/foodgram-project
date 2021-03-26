@@ -1,4 +1,4 @@
-from recipes.models import Purchase, Favorite
+from recipes.models import Favorite, Purchase
 from users.models import Subscription
 
 

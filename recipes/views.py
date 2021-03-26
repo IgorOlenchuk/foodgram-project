@@ -15,7 +15,8 @@ from django.views.decorators.http import (require_GET, require_http_methods,
 from users.models import Subscription
 
 from .forms import RecipeForm
-from .managers import add_subscription_status, extend_context, Favorite, Purchase
+from .managers import (Favorite, Purchase, add_subscription_status,
+                       extend_context)
 from .models import Ingredient, Product, Recipe, Tag, User
 
 
