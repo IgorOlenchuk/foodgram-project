@@ -1,21 +1,5 @@
-from django.db import models
-
-from recipes.models import Favorite, Purchase
+from recipes.models import Purchase, Favorite
 from users.models import Subscription
-
-
-class RecipeManager(models.Manager):
-    def tag_filter(self, tags):
-        if tags:
-            return super().get_queryset().prefetch_related(
-                'author', 'tags'
-            ).filter(
-                tags__slug__in=tags
-            ).distinct()
-        else:
-            return super().get_queryset().prefetch_related(
-                'author', 'tags'
-            ).all()
 
 
 def extend_context(context, user):

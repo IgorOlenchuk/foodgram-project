@@ -1,8 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from .managers import RecipeManager
-
 User = get_user_model()
 
 
@@ -20,6 +18,20 @@ class Tag(models.Model):
 
     def __str__(self):
         return f'{self.name}'
+
+
+class RecipeManager(models.Manager):
+    def tag_filter(self, tags):
+        if tags:
+            return super().get_queryset().prefetch_related(
+                'author', 'tags'
+            ).filter(
+                tags__slug__in=tags
+            ).distinct()
+        else:
+            return super().get_queryset().prefetch_related(
+                'author', 'tags'
+            ).all()
 
 
 class Recipe(models.Model):
@@ -87,17 +99,6 @@ class PurchaseManager(models.Manager):
             return purchase
 
 
-class Purchase(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    recipes = models.ManyToManyField(Recipe)
-
-    purchase = PurchaseManager()
-
-    class Meta:
-        verbose_name = 'покупка'
-        verbose_name_plural = 'покупки'
-
-
 class FavoriteManager(models.Manager):
     def get_favorites(self, user):
         try:
@@ -139,3 +140,14 @@ class Favorite(models.Model):
     class Meta:
         verbose_name = 'избранный'
         verbose_name_plural = 'избранные'
+
+
+class Purchase(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipes = models.ManyToManyField(Recipe)
+
+    purchase = PurchaseManager()
+
+    class Meta:
+        verbose_name = 'покупка'
+        verbose_name_plural = 'покупки'
