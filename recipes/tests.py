@@ -6,7 +6,7 @@ from users.models import Subscription
 from .models import Favorite, Ingredient, Product, Purchase, Recipe, Tag, User
 
 
-def _create_recipe(author, name, tag):
+def create_recipe(author, name, tag):
     products = [Product.objects.create(
         title=f'testIng{i}', unit=i) for i in range(2)]
     recipe = Recipe(author=author, name=name,

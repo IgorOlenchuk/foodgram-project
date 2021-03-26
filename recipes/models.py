@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
-from ..manage import RecipeManager
+from .managers import RecipeManager
 
 User = get_user_model()
 
