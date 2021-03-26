@@ -1,5 +1,6 @@
 from django.db import models
 
+from recipes.models import Favorite, Purchase
 from users.models import Subscription
 
 

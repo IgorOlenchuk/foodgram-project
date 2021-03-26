@@ -93,9 +93,9 @@ class TestTagFilter(TestCase):
         tag2 = Tag.objects.create(name='обед', slug='lunch')
         for i in range(15):
             if i % 2 == 0:
-                _create_recipe(self.user, f'recipe {i}', tag2)
+                create_recipe(self.user, f'recipe {i}', tag2)
             else:
-                _create_recipe(self.user, f'recipe {i}', tag1)
+                create_recipe(self.user, f'recipe {i}', tag1)
 
     def test_filter(self):
         urls = [
@@ -196,8 +196,8 @@ class TestRecipePage(TestCase):
             email='another@test.test',
             password='onetwo34')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
-        self.recipe = _create_recipe(self.user, 'Test recipe', tag)
-        self.recipe2 = _create_recipe(self.user2, 'Another recipe', tag)
+        self.recipe = create_recipe(self.user, 'Test recipe', tag)
+        self.recipe2 = create_recipe(self.user2, 'Another recipe', tag)
 
     def test_not_auth_user(self):
         response = self.client.get(reverse('recipe', args=[self.recipe.id]))
@@ -273,8 +273,8 @@ class TestFavoritePage(TestCase):
             email='test@test.test',
             password='12345six')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
-        self.recipe = _create_recipe(self.user, 'Favorite recipe', tag)
-        _create_recipe(self.user, 'Unfavorite recipe', tag)
+        self.recipe = create_recipe(self.user, 'Favorite recipe', tag)
+        create_recipe(self.user, 'Unfavorite recipe', tag)
         favorite = Favorite(user=self.user)
         favorite.save()
         favorite.recipes.add(Recipe.recipes.get(id=1))
@@ -323,7 +323,7 @@ class TestSubscriptionPage(TestCase):
             email='another@test.test',
             password='onetwo34')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
-        self.recipe = _create_recipe(self.user1, 'Test recipe', tag)
+        self.recipe = create_recipe(self.user1, 'Test recipe', tag)
         Subscription.objects.create(user=self.user2, author=self.user1)
 
     def test_not_auth_user(self):
@@ -362,7 +362,7 @@ class TestPurchasePage(TestCase):
             email='another@test.test',
             password='onetwo34')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
-        self.recipe = _create_recipe(self.user, 'Cool recipe', tag)
+        self.recipe = create_recipe(self.user, 'Cool recipe', tag)
         purchase = Purchase(user=self.user)
         purchase.save()
         purchase.recipes.add(self.recipe)
@@ -432,7 +432,7 @@ class TestFavoriteButton(TestCase):
             email='another@test.test',
             password='onetwo34')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
-        self.recipe = _create_recipe(self.user, 'Cool recipe', tag)
+        self.recipe = create_recipe(self.user, 'Cool recipe', tag)
         self.data = {'id': f'{self.recipe.id}'}
 
     def test_not_auth_user(self):
@@ -596,7 +596,7 @@ class TestPurchaseButton(TestCase):
             email='another@test.test',
             password='onetwo34')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
-        self.recipe = _create_recipe(self.user, 'Cool recipe', tag)
+        self.recipe = create_recipe(self.user, 'Cool recipe', tag)
         self.data = {'id': f'{self.recipe.id}'}
 
     def test_not_auth_user(self):

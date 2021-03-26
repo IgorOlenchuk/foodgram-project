@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
 from .managers import RecipeManager
@@ -34,7 +33,9 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(Tag, verbose_name='Теги', blank=True)
     ingredients = models.ManyToManyField(
         Product, through='Ingredient', related_name='RecipeIngredients')
-    cook_time = models.PositiveSmallIntegerField(verbose_name='Время приготовления')
+    cook_time = models.PositiveSmallIntegerField(
+        verbose_name='Время приготовления'
+    )
     pub_date = models.DateTimeField(
         auto_now_add=True, verbose_name='Время публикации', db_index=True)
 

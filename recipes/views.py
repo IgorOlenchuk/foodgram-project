@@ -3,7 +3,6 @@ from urllib.parse import unquote
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.db.models import Sum
 from django.http import HttpResponse, JsonResponse
@@ -22,8 +21,6 @@ from .models import Favorite, Ingredient, Product, Purchase, Recipe, Tag, User
 
 @require_GET
 def index(request):
-    tags = request.GET.getlist('tag')
-    recipe_list = Recipe.recipes.tag_filter(tags)
     paginator = Paginator(settings.PAGINATION_PAGE_SIZE)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
