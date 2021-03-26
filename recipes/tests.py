@@ -1,7 +1,9 @@
-from django.test import TestCase, Client
+from django.test import Client, TestCase
 from django.urls import reverse
-from .models import User, Recipe, Tag, Product, Ingredient, Favorite, Purchase
+
 from users.models import Subscription
+
+from .models import Favorite, Ingredient, Product, Purchase, Recipe, Tag, User
 
 
 def _create_recipe(author, name, tag):
@@ -118,7 +120,6 @@ class TestTagFilter(TestCase):
         self.assertNotIn(
             tag, resp.content.decode(),
             msg='Фильтры должны правильно работать на странице с избранным')
-        # print(resp.status_code)
 
 
 class TestProfile(TestCase):
@@ -224,7 +225,7 @@ class TestRecipePage(TestCase):
                  ' авторизованному юзеру'))
         elements = {
             'избранное': 'button_style_none" name="favorites"',
-            'список покупок': 'button_style_blue" name="purchpurchases"'
+            'список покупок': 'button_style_blue" name="purchases"'
         }
         for i in elements:
             self.assertIn(
@@ -266,7 +267,7 @@ class TestFavoritePage(TestCase):
     """
 
     def setUp(self):
-        self.clent = Client()
+        self.client = Client()
         self.user = User.objects.create(
             username='Test user',
             email='test@test.test',
@@ -461,7 +462,7 @@ class TestFavoriteButton(TestCase):
                               msg='На запрос должен приходить словарь')
         self.assertIn('success', data_incoming,
                       msg='Словарь должен содержать ключ "success"')
-        self.assertEqual(data_incoming['success'], 'true',
+        self.assertEqual(data_incoming['success'], True,
                          msg='При добавлении в избранное success = true')
         self.assertTrue(Favorite.favorite.get(
             user=self.user).recipes.filter(id=self.recipe.id).exists(),
@@ -490,7 +491,7 @@ class TestFavoriteButton(TestCase):
                               msg='На запрос должен приходить словарь')
         self.assertIn('success', data_incoming,
                       msg='Словарь должен содержать ключ "success"')
-        self.assertEqual(data_incoming['success'], 'true',
+        self.assertEqual(data_incoming['success'], True,
                          msg='При удалении из избранного success = true')
         self.assertFalse(Favorite.favorite.get(
             user=self.user).recipes.filter(id=self.recipe.id).exists(),
@@ -544,7 +545,7 @@ class TestSubscriptionButton(TestCase):
                               msg='Проверьте, что на запрос приходит словарь')
         self.assertIn('success', data_incoming,
                       msg='Проверьте, что словарь содержит ключ "success"')
-        self.assertEqual(data_incoming['success'], 'true',
+        self.assertEqual(data_incoming['success'], True,
                          msg='При добавлении в подписки значение ключа = true')
         self.assertTrue(Subscription.objects.filter(
             user=self.user, author=self.user2).exists(),
@@ -573,7 +574,7 @@ class TestSubscriptionButton(TestCase):
                               msg='На запрос должен приходить словарь')
         self.assertIn('success', data_incoming,
                       msg='Словарь должен содержать ключ "success"')
-        self.assertEqual(data_incoming['success'], 'true',
+        self.assertEqual(data_incoming['success'], True,
                          msg='При удалении из подписок значение ключа = true')
         self.assertFalse(Subscription.objects.filter(
             user=self.user, author=self.user2).exists(),
@@ -625,7 +626,7 @@ class TestPurchaseButton(TestCase):
                               msg='На запрос должен приходить словарь')
         self.assertIn('success', data_incoming,
                       msg='Словарь должен содержать ключ "success"')
-        self.assertEqual(data_incoming['success'], 'true',
+        self.assertEqual(data_incoming['success'], True,
                          msg='При добавлении в покупки значение ключа = true')
         self.assertTrue(Purchase.purchase.get(
             user=self.user).recipes.filter(id=self.recipe.id).exists(),
@@ -654,7 +655,7 @@ class TestPurchaseButton(TestCase):
                               msg='На запрос должен приходить словарь')
         self.assertIn('success', data_incoming,
                       msg='Словарь должен содержать ключ "success"')
-        self.assertEqual(data_incoming['success'], 'true',
+        self.assertEqual(data_incoming['success'], True,
                          msg='При удалении из покупок значение ключа = true')
         self.assertFalse(
             Purchase.purchase.get(user=self.user)

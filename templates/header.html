@@ -2,13 +2,15 @@
     <nav class="nav">
         <div class="nav__container container">
             <ul class="nav__items list">
-                <li class="nav__item{% if request.path == '/' %} nav__item_active{% endif %}"><a href="{% url 'index' %}" class="nav__link link">Рецепты</a></li>
+            {% with request.resolver_match.url_name as url_name %}
+              <li class="nav__item {% if 'index' in url_name %}nav__item_active{% endif %}"><a href="{% url 'index' %}" class="nav__link link">Рецепты</a></li>
                 {% if request.user.is_authenticated %}
                     <li class="nav__item{% if active == 'subscription' %} nav__item_active{% endif %}"><a href="{% url 'my_subscriptions' %}" class="nav__link link">Мои подписки</a></li>
                     <li class="nav__item{% if active == 'new_recipe' %} nav__item_active{% endif %}"><a href="{% url 'new_recipe' %}" class="nav__link link">Создать рецепт</a></li>
                     <li class="nav__item{% if active == 'favorite' %} nav__item_active{% endif %}"><a href="{% url 'favorite' %}" class="nav__link link">Избранное</a></li>
                     <li class="nav__item{% if active == 'purchase' %} nav__item_active{% endif %}"><a href="{% url 'purchases' %}" class="nav__link link">Список покупок</a> <span class="badge badge_style_blue nav__badge" id="counter">{{ counter }}</span></li>
                 {% endif %}
+            {% endwith %}
             </ul>
             <ul class="nav__items list">
                 {% if request.user.is_authenticated %}
