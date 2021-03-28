@@ -1,7 +1,5 @@
-from django.db import models
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist
-
+from django.db import models
 
 User = get_user_model()
 
@@ -9,6 +7,10 @@ User = get_user_model()
 class Product(models.Model):
     title = models.CharField(max_length=255, verbose_name='Название продукта')
     unit = models.CharField(max_length=255, verbose_name='Единицы измерения')
+
+    class Meta:
+        verbose_name_plural = 'Ингредиенты'
+        verbose_name = 'Ингредиенты'
 
     def __str__(self):
         return f'{self.title}, {self.unit}'
@@ -22,39 +24,31 @@ class Tag(models.Model):
         return f'{self.name}'
 
 
-class RecipeManager(models.Manager):
-    def tag_filter(self, tags):
-        if tags:
-            return super().get_queryset().prefetch_related(
-                'author', 'tags'
-            ).filter(
-                tags__slug__in=tags
-            ).distinct()
-        else:
-            return super().get_queryset().prefetch_related(
-                'author', 'tags'
-            ).all()
-
-
 class Recipe(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE,
                                verbose_name='Автор рецепта',
-                               related_name='recipe_author')
+                               related_name='recipes')
     name = models.CharField(max_length=255, verbose_name='Название рецепта')
     description = models.TextField(verbose_name='Описание рецепта')
     image = models.ImageField(upload_to='recipes/',
                               verbose_name='Изображение блюда')
     tags = models.ManyToManyField(Tag, verbose_name='Теги', blank=True)
     ingredients = models.ManyToManyField(
-        Product, through='Ingredient', related_name='recipe_ingredients')
-    cook_time = models.IntegerField(verbose_name='Время приготовления')
+        Product, through='Ingredient', related_name='recipeIngredients')
+    cook_time = models.PositiveIntegerField(verbose_name='Время приготовления')
     pub_date = models.DateTimeField(
         auto_now_add=True, verbose_name='Время публикации', db_index=True)
-
-    recipes = RecipeManager()
+    favorite_by = models.ManyToManyField(User, through='Favorite',
+                                         related_name='favorite_recipes',
+                                         blank=True)
+    purchase_by = models.ManyToManyField(User, through='Purchase',
+                                         related_name='shop_list',
+                                         blank=True)
 
     class Meta:
-        ordering = ('-pub_date',)
+        ordering = ['-pub_date']
+        verbose_name_plural = 'Рецепты'
+        verbose_name = 'Рецепты'
 
     def __str__(self):
         return f'{self.name}'
@@ -66,75 +60,40 @@ class Ingredient(models.Model):
     amount = models.FloatField(verbose_name='Количество ингредиента')
 
     class Meta:
-        unique_together = ('ingredient', 'amount', 'recipe')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['ingredient', 'amount', 'recipe'],
+                name='unique_ingredient'
+            )
+        ]
 
     def __str__(self):
         return f'{self.amount}'
 
 
-class PurchaseManager(models.Manager):
-    def counter(self, user):
-        try:
-            return super().get_queryset().get(user=user).recipes.count()
-        except ObjectDoesNotExist:
-            return 0
-
-    def get_purchases_list(self, user):
-        try:
-            return super().get_queryset().get(user=user).recipes.all()
-        except ObjectDoesNotExist:
-            return []
-
-    def get_user_purchase(self, user):
-        try:
-            return super().get_queryset().get(user=user)
-        except ObjectDoesNotExist:
-            purchase = Purchase(user=user)
-            purchase.save()
-            return purchase
-
-
 class Purchase(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    recipes = models.ManyToManyField(Recipe)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    created = models.DateTimeField('date of creation', auto_now_add=True)
 
-    purchase = PurchaseManager()
+    class Meta:
+        ordering = ['-created']
+        verbose_name_plural = 'Список покупок'
+        verbose_name = 'Список покупок'
 
-
-class FavoriteManager(models.Manager):
-    def get_favorites(self, user):
-        try:
-            return super().get_queryset().get(user=user).recipes.all()
-        except ObjectDoesNotExist:
-            return []
-
-    def get_tag_filtered(self, user, tags):
-        try:
-            recipes = super().get_queryset().get(user=user).recipes.all()
-            if tags:
-                return recipes.prefetch_related(
-                    'author', 'tags'
-                ).filter(
-                    tags__slug__in=tags
-                ).distinct()
-            else:
-                return recipes.prefetch_related(
-                    'author', 'tags'
-                ).all()
-        except ObjectDoesNotExist:
-            return []
-
-    def get_user(self, user):
-        try:
-            return super().get_queryset().get(user=user)
-        except ObjectDoesNotExist:
-            favorite_user = Favorite(user=user)
-            favorite_user.save()
-            return favorite_user
+    def __str__(self):
+        return f'{self.recipe}'
 
 
 class Favorite(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    recipes = models.ManyToManyField(Recipe)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    created = models.DateTimeField('date published', auto_now_add=True)
 
-    favorite = FavoriteManager()
+    class Meta:
+        ordering = ['-created']
+        verbose_name_plural = 'Избранное'
+        verbose_name = 'Избранное'
+
+    def __str__(self):
+        return f'{self.recipe}'
