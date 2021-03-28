@@ -94,14 +94,6 @@ jobs:
          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram:latest
          id=$(docker create ${{ secrets.DOCKER_USERNAME }}/foodgram:latest)
          FILE=docker-compose.yaml
-         if [ -f "$FILE" ]
-         then
-             echo "$FILE exists and will removed"
-             rm $FILE
-         else
-             echo "$FILE does not exist"
-         fi
-         echo "Add new $FILE"
          docker cp $id:/usr/src/web/$FILE $FILE
          sudo docker rm -v $id
          sudo docker stop $(sudo docker ps -a -q) > /dev/null 2>&1
