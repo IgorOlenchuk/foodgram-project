@@ -23,6 +23,7 @@ class RecipeForm(forms.ModelForm):
                        'name': 'time'}),
             'description': forms.Textarea(attrs={'class': 'form__textarea',
                                                  'rows': '8'}),
+            'tags': forms.CheckboxSelectMultiple(),
         }
         labels = {
             'image': 'Загрузить фото'

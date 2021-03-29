@@ -1,12 +1,10 @@
-from django.test import Client, TestCase
+from django.test import TestCase, Client
 from django.urls import reverse
-
+from .models import User, Recipe, Tag, Product, Ingredient, Favorite, Purchase
 from users.models import Subscription
 
-from .models import Favorite, Ingredient, Product, Purchase, Recipe, Tag, User
 
-
-def create_recipe(author, name, tag):
+def _create_recipe(author, name, tag):
     products = [Product.objects.create(
         title=f'testIng{i}', unit=i) for i in range(2)]
     recipe = Recipe(author=author, name=name,
@@ -93,9 +91,9 @@ class TestTagFilter(TestCase):
         tag2 = Tag.objects.create(name='обед', slug='lunch')
         for i in range(15):
             if i % 2 == 0:
-                create_recipe(self.user, f'recipe {i}', tag2)
+                _create_recipe(self.user, f'recipe {i}', tag2)
             else:
-                create_recipe(self.user, f'recipe {i}', tag1)
+                _create_recipe(self.user, f'recipe {i}', tag1)
 
     def test_filter(self):
         urls = [
@@ -120,6 +118,7 @@ class TestTagFilter(TestCase):
         self.assertNotIn(
             tag, resp.content.decode(),
             msg='Фильтры должны правильно работать на странице с избранным')
+        # print(resp.status_code)
 
 
 class TestProfile(TestCase):
@@ -196,8 +195,8 @@ class TestRecipePage(TestCase):
             email='another@test.test',
             password='onetwo34')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
-        self.recipe = create_recipe(self.user, 'Test recipe', tag)
-        self.recipe2 = create_recipe(self.user2, 'Another recipe', tag)
+        self.recipe = _create_recipe(self.user, 'Test recipe', tag)
+        self.recipe2 = _create_recipe(self.user2, 'Another recipe', tag)
 
     def test_not_auth_user(self):
         response = self.client.get(reverse('recipe', args=[self.recipe.id]))
@@ -225,7 +224,7 @@ class TestRecipePage(TestCase):
                  ' авторизованному юзеру'))
         elements = {
             'избранное': 'button_style_none" name="favorites"',
-            'список покупок': 'button_style_blue" name="purchases"'
+            'список покупок': 'button_style_blue" name="purchpurchases"'
         }
         for i in elements:
             self.assertIn(
@@ -267,14 +266,14 @@ class TestFavoritePage(TestCase):
     """
 
     def setUp(self):
-        self.client = Client()
+        self.clent = Client()
         self.user = User.objects.create(
             username='Test user',
             email='test@test.test',
             password='12345six')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
-        self.recipe = create_recipe(self.user, 'Favorite recipe', tag)
-        create_recipe(self.user, 'Unfavorite recipe', tag)
+        self.recipe = _create_recipe(self.user, 'Favorite recipe', tag)
+        _create_recipe(self.user, 'Unfavorite recipe', tag)
         favorite = Favorite(user=self.user)
         favorite.save()
         favorite.recipes.add(Recipe.recipes.get(id=1))
@@ -323,7 +322,7 @@ class TestSubscriptionPage(TestCase):
             email='another@test.test',
             password='onetwo34')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
-        self.recipe = create_recipe(self.user1, 'Test recipe', tag)
+        self.recipe = _create_recipe(self.user1, 'Test recipe', tag)
         Subscription.objects.create(user=self.user2, author=self.user1)
 
     def test_not_auth_user(self):
@@ -362,7 +361,7 @@ class TestPurchasePage(TestCase):
             email='another@test.test',
             password='onetwo34')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
-        self.recipe = create_recipe(self.user, 'Cool recipe', tag)
+        self.recipe = _create_recipe(self.user, 'Cool recipe', tag)
         purchase = Purchase(user=self.user)
         purchase.save()
         purchase.recipes.add(self.recipe)
@@ -432,7 +431,7 @@ class TestFavoriteButton(TestCase):
             email='another@test.test',
             password='onetwo34')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
-        self.recipe = create_recipe(self.user, 'Cool recipe', tag)
+        self.recipe = _create_recipe(self.user, 'Cool recipe', tag)
         self.data = {'id': f'{self.recipe.id}'}
 
     def test_not_auth_user(self):
@@ -462,7 +461,7 @@ class TestFavoriteButton(TestCase):
                               msg='На запрос должен приходить словарь')
         self.assertIn('success', data_incoming,
                       msg='Словарь должен содержать ключ "success"')
-        self.assertEqual(data_incoming['success'], True,
+        self.assertEqual(data_incoming['success'], 'true',
                          msg='При добавлении в избранное success = true')
         self.assertTrue(Favorite.favorite.get(
             user=self.user).recipes.filter(id=self.recipe.id).exists(),
@@ -491,7 +490,7 @@ class TestFavoriteButton(TestCase):
                               msg='На запрос должен приходить словарь')
         self.assertIn('success', data_incoming,
                       msg='Словарь должен содержать ключ "success"')
-        self.assertEqual(data_incoming['success'], True,
+        self.assertEqual(data_incoming['success'], 'true',
                          msg='При удалении из избранного success = true')
         self.assertFalse(Favorite.favorite.get(
             user=self.user).recipes.filter(id=self.recipe.id).exists(),
@@ -545,7 +544,7 @@ class TestSubscriptionButton(TestCase):
                               msg='Проверьте, что на запрос приходит словарь')
         self.assertIn('success', data_incoming,
                       msg='Проверьте, что словарь содержит ключ "success"')
-        self.assertEqual(data_incoming['success'], True,
+        self.assertEqual(data_incoming['success'], 'true',
                          msg='При добавлении в подписки значение ключа = true')
         self.assertTrue(Subscription.objects.filter(
             user=self.user, author=self.user2).exists(),
@@ -574,7 +573,7 @@ class TestSubscriptionButton(TestCase):
                               msg='На запрос должен приходить словарь')
         self.assertIn('success', data_incoming,
                       msg='Словарь должен содержать ключ "success"')
-        self.assertEqual(data_incoming['success'], True,
+        self.assertEqual(data_incoming['success'], 'true',
                          msg='При удалении из подписок значение ключа = true')
         self.assertFalse(Subscription.objects.filter(
             user=self.user, author=self.user2).exists(),
@@ -596,7 +595,7 @@ class TestPurchaseButton(TestCase):
             email='another@test.test',
             password='onetwo34')
         tag = Tag.objects.create(name='завтрак', slug='breakfast')
-        self.recipe = create_recipe(self.user, 'Cool recipe', tag)
+        self.recipe = _create_recipe(self.user, 'Cool recipe', tag)
         self.data = {'id': f'{self.recipe.id}'}
 
     def test_not_auth_user(self):
@@ -626,7 +625,7 @@ class TestPurchaseButton(TestCase):
                               msg='На запрос должен приходить словарь')
         self.assertIn('success', data_incoming,
                       msg='Словарь должен содержать ключ "success"')
-        self.assertEqual(data_incoming['success'], True,
+        self.assertEqual(data_incoming['success'], 'true',
                          msg='При добавлении в покупки значение ключа = true')
         self.assertTrue(Purchase.purchase.get(
             user=self.user).recipes.filter(id=self.recipe.id).exists(),
@@ -655,7 +654,7 @@ class TestPurchaseButton(TestCase):
                               msg='На запрос должен приходить словарь')
         self.assertIn('success', data_incoming,
                       msg='Словарь должен содержать ключ "success"')
-        self.assertEqual(data_incoming['success'], True,
+        self.assertEqual(data_incoming['success'], 'true',
                          msg='При удалении из покупок значение ключа = true')
         self.assertFalse(
             Purchase.purchase.get(user=self.user)

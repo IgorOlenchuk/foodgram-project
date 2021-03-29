@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 SECRET_KEY = '7y16j%db!@nbwg8u&s%nvn#p(&4ymdvedc3y+zekz!7&uqbfrb'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['178.154.214.205', 'localhost', 'centralpark.gq', 'www.centralpark.gq']
 
 
 # Application definition
@@ -76,6 +76,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'foodgram.context_processor.counter',
             ],
         },
     },
@@ -166,9 +167,11 @@ EMAIL_USE_TLS = True
 SERVER_EMAIL = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-if DEBUG:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-else:
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_mails')
 
-PAGINATION_PAGE_SIZE = 6
+#if DEBUG:
+#    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+#else:
+#    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
