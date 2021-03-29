@@ -41,13 +41,15 @@ def index(request):
     return render(request, 'index.html', context)
 
 
-
 @require_GET
 def profile(request, user_id):
     author = get_object_or_404(User, id=user_id)
     tags = request.GET.getlist('tag')
     recipe_list = tag_filter(Recipe, tags)
-    paginator = Paginator(recipe_list.filter(author=author), PAGINATION_PAGE_SIZE)
+    paginator = Paginator(
+        recipe_list.filter(author=author),
+        PAGINATION_PAGE_SIZE
+    )
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     context = {
